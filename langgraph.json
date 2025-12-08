@@ -1,0 +1,7 @@
+{
+  "dependencies": ["."],
+  "graphs": {
+    "supervisor_workflow": "./studio_app.py:app"
+  },
+  "env": ".env"
+}
