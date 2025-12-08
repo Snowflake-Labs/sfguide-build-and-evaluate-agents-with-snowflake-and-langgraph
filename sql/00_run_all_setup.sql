@@ -50,12 +50,43 @@ LS @customer_intelligence_demo/branches/main/sql/;
 EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/01_setup_database.sql;
 
 -- ============================================================================
--- STEP 2: LOAD DEMO DATA FROM CSV FILES
+-- STEP 2: LOAD DEMO DATA FROM CSV FILES  
 -- ============================================================================
--- Create the load procedure
-EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/02_load_data.sql;
--- Call the procedure to actually load data
-CALL CUSTOMER_INTELLIGENCE_DB.PUBLIC.load_demo_data();
+-- NOTE: Data loading is embedded here because EXECUTE IMMEDIATE FROM 
+--       doesn't reliably execute from Git stages for complex statements.
+
+-- Create file format
+CREATE OR REPLACE FILE FORMAT CUSTOMER_INTELLIGENCE_DB.PUBLIC.csv_format
+    TYPE = CSV SKIP_HEADER = 1 FIELD_OPTIONALLY_ENCLOSED_BY = '"'
+    NULL_IF = ('', 'NULL', 'null') EMPTY_FIELD_AS_NULL = TRUE;
+
+-- Clear existing data
+TRUNCATE TABLE IF EXISTS CUSTOMER_INTELLIGENCE_DB.PUBLIC.CUSTOMERS;
+TRUNCATE TABLE IF EXISTS CUSTOMER_INTELLIGENCE_DB.PUBLIC.USAGE_EVENTS;
+TRUNCATE TABLE IF EXISTS CUSTOMER_INTELLIGENCE_DB.PUBLIC.SUPPORT_TICKETS;
+TRUNCATE TABLE IF EXISTS CUSTOMER_INTELLIGENCE_DB.PUBLIC.CHURN_EVENTS;
+
+-- Load CUSTOMERS
+INSERT INTO CUSTOMER_INTELLIGENCE_DB.PUBLIC.CUSTOMERS 
+SELECT $1,$2,$3,$4,$5,$6,$7 FROM @customer_intelligence_demo/branches/main/demo_customers.csv (FILE_FORMAT=>csv_format);
+
+-- Load USAGE_EVENTS  
+INSERT INTO CUSTOMER_INTELLIGENCE_DB.PUBLIC.USAGE_EVENTS
+SELECT $1,$2,$3,$4,$5,$6 FROM @customer_intelligence_demo/branches/main/demo_usage_events.csv (FILE_FORMAT=>csv_format);
+
+-- Load SUPPORT_TICKETS
+INSERT INTO CUSTOMER_INTELLIGENCE_DB.PUBLIC.SUPPORT_TICKETS
+SELECT $1,$2,$3,$4,$5,$6,$7,$8,$9 FROM @customer_intelligence_demo/branches/main/demo_support_tickets.csv (FILE_FORMAT=>csv_format);
+
+-- Load CHURN_EVENTS
+INSERT INTO CUSTOMER_INTELLIGENCE_DB.PUBLIC.CHURN_EVENTS
+SELECT $1,$2,$3,$4,$5,$6,$7 FROM @customer_intelligence_demo/branches/main/demo_churn_events.csv (FILE_FORMAT=>csv_format);
+
+-- Verify data loaded
+SELECT 'CUSTOMERS' as tbl, COUNT(*) as cnt FROM CUSTOMERS
+UNION ALL SELECT 'USAGE_EVENTS', COUNT(*) FROM USAGE_EVENTS
+UNION ALL SELECT 'SUPPORT_TICKETS', COUNT(*) FROM SUPPORT_TICKETS  
+UNION ALL SELECT 'CHURN_EVENTS', COUNT(*) FROM CHURN_EVENTS;
 
 -- ============================================================================
 -- STEP 3: CREATE CORTEX SEARCH SERVICES
