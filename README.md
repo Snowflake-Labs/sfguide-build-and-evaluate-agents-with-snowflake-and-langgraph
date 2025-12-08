@@ -81,51 +81,59 @@ SHOW GIT BRANCHES IN customer_intelligence_demo;
 LS @customer_intelligence_demo/branches/main/sql/;
 ```
 
-### Step 2: Run Setup Scripts from Git
-
-Execute each SQL script directly from the repository:
+### Step 2: Create Tables (in Snowsight)
 
 ```sql
--- 1. Set up database, tables, and load demo data
+-- Create database and tables
 EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/01_setup_database.sql;
 
--- 2. Set up Cortex Search services
-EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/02_setup_cortex_search.sql;
-
--- 3. Create Semantic Views for Cortex Analyst
-EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/03_create_semantic_views.sql;
-
--- 4. Create custom AI UDFs (tools for agents)
-EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/04_setup_udfs.sql;
-
--- 5. Create Cortex Agents
-EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/05_setup_cortex_agents.sql;
+-- Create stage for CSV uploads
+EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/02_load_data.sql;
 ```
 
-### Step 3: Update Repository (Optional)
+### Step 3: Upload CSV Data (in Snowsight)
 
-Pull latest changes from GitHub:
+1. In Snowsight, navigate to: **Data → Databases → CUSTOMER_INTELLIGENCE_DB → PUBLIC → Stages**
+2. Click on **DEMO_DATA_STAGE**
+3. Click **"+ Files"** button (top right)
+4. Upload these 4 CSV files from the repo:
+   - `demo_customers.csv`
+   - `demo_usage_events.csv`
+   - `demo_support_tickets.csv`
+   - `demo_churn_events.csv`
+
+5. Run the COPY INTO commands:
 
 ```sql
-ALTER GIT REPOSITORY customer_intelligence_demo FETCH;
+COPY INTO CUSTOMERS FROM @demo_data_stage/demo_customers.csv ON_ERROR=CONTINUE;
+COPY INTO USAGE_EVENTS FROM @demo_data_stage/demo_usage_events.csv ON_ERROR=CONTINUE;
+COPY INTO SUPPORT_TICKETS FROM @demo_data_stage/demo_support_tickets.csv ON_ERROR=CONTINUE;
+COPY INTO CHURN_EVENTS FROM @demo_data_stage/demo_churn_events.csv ON_ERROR=CONTINUE;
+
+-- Verify data loaded
+SELECT 'CUSTOMERS' as tbl, COUNT(*) as rows FROM CUSTOMERS
+UNION ALL SELECT 'USAGE_EVENTS', COUNT(*) FROM USAGE_EVENTS
+UNION ALL SELECT 'SUPPORT_TICKETS', COUNT(*) FROM SUPPORT_TICKETS
+UNION ALL SELECT 'CHURN_EVENTS', COUNT(*) FROM CHURN_EVENTS;
 ```
 
-### Alternative: Generate Custom Data Locally
+### Step 4: Create Cortex Services (in Snowsight)
 
-The data generation requires Python. Run locally:
+```sql
+-- Create Cortex Search services
+EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/03_setup_cortex_search.sql;
 
-```bash
-git clone https://github.com/Snowflake-Labs/sfguide-build-and-evaluate-agents-with-snowflake-and-langgraph.git
-cd sfguide-build-and-evaluate-agents-with-snowflake-and-langgraph
+-- Create Semantic Views for Cortex Analyst
+EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/04_create_semantic_views.sql;
 
-pip install -r requirements.txt
-cp .env.template .env
-# Edit .env with your Snowflake credentials
+-- Create custom AI UDFs (tools for agents)
+EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/05_setup_udfs.sql;
 
-python data_generation.py
+-- Create Cortex Agents
+EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/06_setup_cortex_agents.sql;
 ```
 
-### Step 4: Update Repository (Optional)
+### Step 5: Update Repository (Optional)
 
 Pull latest changes:
 
@@ -184,10 +192,11 @@ agent_schema = "AGENTS"                     # Your agent schema
 |--------|---------|
 | `00_run_all_setup.sql` | Master script with Git integration setup |
 | `01_setup_database.sql` | Creates database, schema, and tables |
-| `02_setup_cortex_search.sql` | Creates Cortex Search service |
-| `03_create_semantic_views.sql` | Creates Semantic Views for Cortex Analyst |
-| `04_setup_udfs.sql` | Creates AI UDFs (tools for agents) |
-| `05_setup_cortex_agents.sql` | Creates the three Cortex Agents |
+| `02_load_data.sql` | Creates stage & COPY INTO commands for CSV data |
+| `03_setup_cortex_search.sql` | Creates Cortex Search service |
+| `04_create_semantic_views.sql` | Creates Semantic Views for Cortex Analyst |
+| `05_setup_udfs.sql` | Creates AI UDFs (tools for agents) |
+| `06_setup_cortex_agents.sql` | Creates the three Cortex Agents |
 
 ## Running the Demo
 
@@ -229,10 +238,11 @@ Try these business scenarios:
 ├── sql/                       # Snowflake setup scripts
 │   ├── 00_run_all_setup.sql   # Master script (Git integration)
 │   ├── 01_setup_database.sql  # Database, schema, tables
-│   ├── 02_setup_cortex_search.sql
-│   ├── 03_create_semantic_views.sql
-│   ├── 04_setup_udfs.sql      # AI UDFs (tools for agents)
-│   └── 05_setup_cortex_agents.sql
+│   ├── 02_load_data.sql       # Stage creation & CSV loading
+│   ├── 03_setup_cortex_search.sql
+│   ├── 04_create_semantic_views.sql
+│   ├── 05_setup_udfs.sql      # AI UDFs (tools for agents)
+│   └── 06_setup_cortex_agents.sql
 │
 └── README.md
 ```
