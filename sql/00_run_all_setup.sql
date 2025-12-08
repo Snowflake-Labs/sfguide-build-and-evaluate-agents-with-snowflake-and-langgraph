@@ -67,19 +67,19 @@ TRUNCATE TABLE IF EXISTS CUSTOMER_INTELLIGENCE_DB.PUBLIC.SUPPORT_TICKETS;
 TRUNCATE TABLE IF EXISTS CUSTOMER_INTELLIGENCE_DB.PUBLIC.CHURN_EVENTS;
 
 -- Load CUSTOMERS
-INSERT INTO CUSTOMER_INTELLIGENCE_DB.PUBLIC.CUSTOMERS 
+INSERT INTO CUSTOMER_INTELLIGENCE_DB.PUBLIC.CUSTOMERS (customer_id, signup_date, plan_type, company_size, industry, status, monthly_revenue)
 SELECT $1,$2,$3,$4,$5,$6,$7 FROM @customer_intelligence_demo/branches/main/demo_customers.csv (FILE_FORMAT=>csv_format);
 
 -- Load USAGE_EVENTS  
-INSERT INTO CUSTOMER_INTELLIGENCE_DB.PUBLIC.USAGE_EVENTS
+INSERT INTO CUSTOMER_INTELLIGENCE_DB.PUBLIC.USAGE_EVENTS (event_id, customer_id, event_date, feature_used, session_duration_minutes, actions_count)
 SELECT $1,$2,$3,$4,$5,$6 FROM @customer_intelligence_demo/branches/main/demo_usage_events.csv (FILE_FORMAT=>csv_format);
 
 -- Load SUPPORT_TICKETS
-INSERT INTO CUSTOMER_INTELLIGENCE_DB.PUBLIC.SUPPORT_TICKETS
+INSERT INTO CUSTOMER_INTELLIGENCE_DB.PUBLIC.SUPPORT_TICKETS (ticket_id, customer_id, created_date, category, priority, status, resolution_time_hours, satisfaction_score, ticket_text)
 SELECT $1,$2,$3,$4,$5,$6,$7,$8,$9 FROM @customer_intelligence_demo/branches/main/demo_support_tickets.csv (FILE_FORMAT=>csv_format);
 
 -- Load CHURN_EVENTS
-INSERT INTO CUSTOMER_INTELLIGENCE_DB.PUBLIC.CHURN_EVENTS
+INSERT INTO CUSTOMER_INTELLIGENCE_DB.PUBLIC.CHURN_EVENTS (churn_id, customer_id, churn_date, churn_reason, days_since_signup, final_plan_type, final_monthly_revenue)
 SELECT $1,$2,$3,$4,$5,$6,$7 FROM @customer_intelligence_demo/branches/main/demo_churn_events.csv (FILE_FORMAT=>csv_format);
 
 -- Verify data loaded
