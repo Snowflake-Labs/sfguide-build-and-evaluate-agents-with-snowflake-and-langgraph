@@ -1,9 +1,8 @@
 -- ============================================================================
 -- 02_load_data.sql
--- Load demo data from CSV files in the Git repository
+-- Creates stored procedure to load demo data from CSV files
 -- ============================================================================
 
--- Create stored procedure to load all data
 CREATE OR REPLACE PROCEDURE CUSTOMER_INTELLIGENCE_DB.PUBLIC.load_demo_data()
 RETURNS VARCHAR
 LANGUAGE SQL
@@ -50,13 +49,4 @@ BEGIN
 
     RETURN 'Data loaded successfully';
 END;
-$$;
-
--- Call the procedure to load data
-CALL CUSTOMER_INTELLIGENCE_DB.PUBLIC.load_demo_data();
-
--- Verify counts
-SELECT 'CUSTOMERS' as table_name, COUNT(*) as row_count FROM CUSTOMER_INTELLIGENCE_DB.PUBLIC.CUSTOMERS
-UNION ALL SELECT 'USAGE_EVENTS', COUNT(*) FROM CUSTOMER_INTELLIGENCE_DB.PUBLIC.USAGE_EVENTS
-UNION ALL SELECT 'SUPPORT_TICKETS', COUNT(*) FROM CUSTOMER_INTELLIGENCE_DB.PUBLIC.SUPPORT_TICKETS
-UNION ALL SELECT 'CHURN_EVENTS', COUNT(*) FROM CUSTOMER_INTELLIGENCE_DB.PUBLIC.CHURN_EVENTS;
+$$

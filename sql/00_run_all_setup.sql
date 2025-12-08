@@ -52,7 +52,10 @@ EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/01_setup_da
 -- ============================================================================
 -- STEP 2: LOAD DEMO DATA FROM CSV FILES
 -- ============================================================================
+-- Create the load procedure
 EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/02_load_data.sql;
+-- Call the procedure to actually load data
+CALL CUSTOMER_INTELLIGENCE_DB.PUBLIC.load_demo_data();
 
 -- ============================================================================
 -- STEP 3: CREATE CORTEX SEARCH SERVICES
