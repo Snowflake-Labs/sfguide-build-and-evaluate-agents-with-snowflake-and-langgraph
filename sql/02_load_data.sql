@@ -1,128 +1,83 @@
 -- ============================================================================
 -- 02_load_data.sql
--- Load demo data from CSV files in the Git repository using Snowpark
+-- Load demo data from CSV files in the Git repository
 -- ============================================================================
 
 USE DATABASE CUSTOMER_INTELLIGENCE_DB;
 USE SCHEMA PUBLIC;
 
 -- ============================================================================
--- CREATE STORED PROCEDURE TO LOAD CSV DATA FROM GIT REPO
+-- CREATE FILE FORMAT FOR CSV PARSING
 -- ============================================================================
-CREATE OR REPLACE PROCEDURE load_csv_from_git(
-    table_name VARCHAR,
-    csv_filename VARCHAR,
-    columns ARRAY
-)
-RETURNS VARCHAR
-LANGUAGE PYTHON
-RUNTIME_VERSION = '3.11'
-PACKAGES = ('snowflake-snowpark-python')
-HANDLER = 'load_csv'
-AS
-$$
-import csv
-from io import StringIO
-
-def load_csv(session, table_name: str, csv_filename: str, columns: list) -> str:
-    """Load CSV data from Git repo stage into a table."""
-    
-    # Read the CSV file from the Git repository stage
-    stage_path = f"@customer_intelligence_demo/branches/main/{csv_filename}"
-    
-    try:
-        # Get file content from stage
-        result = session.sql(f"SELECT $1 FROM {stage_path}").collect()
-        
-        if not result:
-            return f"Error: No data found in {csv_filename}"
-        
-        # Parse CSV content and build INSERT statements
-        rows_inserted = 0
-        batch_size = 100
-        values_batch = []
-        
-        # Skip header row (first row)
-        for i, row in enumerate(result):
-            if i == 0:  # Skip header
-                continue
-                
-            # Parse the CSV row
-            line = row[0]
-            reader = csv.reader(StringIO(line))
-            for parsed_row in reader:
-                # Escape single quotes and format values
-                formatted_values = []
-                for val in parsed_row:
-                    if val is None or val == '' or val.upper() == 'NULL':
-                        formatted_values.append('NULL')
-                    else:
-                        # Escape single quotes
-                        escaped_val = val.replace("'", "''")
-                        formatted_values.append(f"'{escaped_val}'")
-                
-                values_batch.append(f"({', '.join(formatted_values)})")
-                
-                # Execute batch insert
-                if len(values_batch) >= batch_size:
-                    cols_str = ', '.join(columns)
-                    values_str = ', '.join(values_batch)
-                    insert_sql = f"INSERT INTO {table_name} ({cols_str}) VALUES {values_str}"
-                    session.sql(insert_sql).collect()
-                    rows_inserted += len(values_batch)
-                    values_batch = []
-        
-        # Insert remaining rows
-        if values_batch:
-            cols_str = ', '.join(columns)
-            values_str = ', '.join(values_batch)
-            insert_sql = f"INSERT INTO {table_name} ({cols_str}) VALUES {values_str}"
-            session.sql(insert_sql).collect()
-            rows_inserted += len(values_batch)
-        
-        return f"Successfully loaded {rows_inserted} rows into {table_name}"
-        
-    except Exception as e:
-        return f"Error loading {csv_filename}: {str(e)}"
-$$;
+CREATE OR REPLACE FILE FORMAT csv_format
+    TYPE = CSV
+    SKIP_HEADER = 1
+    FIELD_OPTIONALLY_ENCLOSED_BY = '"'
+    NULL_IF = ('', 'NULL', 'null')
+    EMPTY_FIELD_AS_NULL = TRUE;
 
 -- ============================================================================
--- LOAD ALL CSV FILES
+-- LOAD DATA USING INSERT...SELECT FROM STAGED FILES
 -- ============================================================================
 
--- Clear existing data (optional - comment out to append)
+-- Clear existing data
 TRUNCATE TABLE IF EXISTS CUSTOMERS;
 TRUNCATE TABLE IF EXISTS USAGE_EVENTS;
 TRUNCATE TABLE IF EXISTS SUPPORT_TICKETS;
 TRUNCATE TABLE IF EXISTS CHURN_EVENTS;
 
--- Load customers
-CALL load_csv_from_git(
-    'CUSTOMERS',
-    'demo_customers.csv',
-    ARRAY_CONSTRUCT('customer_id', 'signup_date', 'plan_type', 'company_size', 'industry', 'status', 'monthly_revenue')
-);
+-- Load CUSTOMERS
+INSERT INTO CUSTOMERS (customer_id, signup_date, plan_type, company_size, industry, status, monthly_revenue)
+SELECT 
+    $1::VARCHAR,           -- customer_id
+    $2::DATE,              -- signup_date
+    $3::VARCHAR,           -- plan_type
+    $4::VARCHAR,           -- company_size
+    $5::VARCHAR,           -- industry
+    $6::VARCHAR,           -- status
+    $7::DECIMAL(10,2)      -- monthly_revenue
+FROM @customer_intelligence_demo/branches/main/demo_customers.csv
+(FILE_FORMAT => csv_format);
 
--- Load usage events
-CALL load_csv_from_git(
-    'USAGE_EVENTS',
-    'demo_usage_events.csv',
-    ARRAY_CONSTRUCT('event_id', 'customer_id', 'event_date', 'feature_used', 'session_duration_minutes', 'actions_count')
-);
+-- Load USAGE_EVENTS
+INSERT INTO USAGE_EVENTS (event_id, customer_id, event_date, feature_used, session_duration_minutes, actions_count)
+SELECT 
+    $1::VARCHAR,           -- event_id
+    $2::VARCHAR,           -- customer_id
+    $3::DATE,              -- event_date
+    $4::VARCHAR,           -- feature_used
+    $5::INTEGER,           -- session_duration_minutes
+    $6::INTEGER            -- actions_count
+FROM @customer_intelligence_demo/branches/main/demo_usage_events.csv
+(FILE_FORMAT => csv_format);
 
--- Load support tickets
-CALL load_csv_from_git(
-    'SUPPORT_TICKETS',
-    'demo_support_tickets.csv',
-    ARRAY_CONSTRUCT('ticket_id', 'customer_id', 'created_date', 'category', 'priority', 'status', 'resolution_time_hours', 'satisfaction_score', 'ticket_text')
-);
+-- Load SUPPORT_TICKETS
+INSERT INTO SUPPORT_TICKETS (ticket_id, customer_id, created_date, category, priority, status, resolution_time_hours, satisfaction_score, ticket_text)
+SELECT 
+    $1::VARCHAR,           -- ticket_id
+    $2::VARCHAR,           -- customer_id
+    $3::DATE,              -- created_date
+    $4::VARCHAR,           -- category
+    $5::VARCHAR,           -- priority
+    $6::VARCHAR,           -- status
+    $7::INTEGER,           -- resolution_time_hours
+    $8::INTEGER,           -- satisfaction_score
+    $9::VARCHAR            -- ticket_text
+FROM @customer_intelligence_demo/branches/main/demo_support_tickets.csv
+(FILE_FORMAT => csv_format);
 
--- Load churn events
-CALL load_csv_from_git(
-    'CHURN_EVENTS',
-    'demo_churn_events.csv',
-    ARRAY_CONSTRUCT('churn_id', 'customer_id', 'churn_date', 'churn_reason', 'days_since_signup', 'final_mrr')
-);
+-- Load CHURN_EVENTS
+INSERT INTO CHURN_EVENTS (churn_id, customer_id, churn_date, churn_reason, days_since_signup, final_plan_type, final_monthly_revenue)
+SELECT 
+    $1::VARCHAR,           -- churn_id
+    $2::VARCHAR,           -- customer_id
+    $3::DATE,              -- churn_date
+    $4::VARCHAR,           -- churn_reason
+    $5::INTEGER,           -- days_since_signup
+    $6::VARCHAR,           -- final_plan_type
+    $7::DECIMAL(10,2)      -- final_monthly_revenue
+FROM @customer_intelligence_demo/branches/main/demo_churn_events.csv
+(FILE_FORMAT => csv_format);
 
 -- ============================================================================
 -- VERIFY DATA LOADED

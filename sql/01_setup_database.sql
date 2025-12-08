@@ -63,7 +63,8 @@ CREATE OR REPLACE TABLE CHURN_EVENTS (
     churn_date DATE NOT NULL,
     churn_reason VARCHAR(50) NOT NULL,
     days_since_signup INTEGER NOT NULL,
-    final_mrr DECIMAL(10,2),
+    final_plan_type VARCHAR(20),
+    final_monthly_revenue DECIMAL(10,2),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
 );
 
