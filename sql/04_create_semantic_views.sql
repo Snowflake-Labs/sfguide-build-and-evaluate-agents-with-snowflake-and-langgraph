@@ -1,5 +1,5 @@
 -- ============================================================================
--- 03_create_semantic_views.sql
+-- 04_create_semantic_views.sql
 -- Creates Semantic Views for Cortex Analyst tools
 -- Reference: https://docs.snowflake.com/en/sql-reference/sql/create-semantic-view
 -- ============================================================================

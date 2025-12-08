@@ -81,45 +81,15 @@ SHOW GIT BRANCHES IN customer_intelligence_demo;
 LS @customer_intelligence_demo/branches/main/sql/;
 ```
 
-### Step 2: Create Tables (in Snowsight)
+### Step 2: Run Setup Scripts (in Snowsight)
 
 ```sql
 -- Create database and tables
 EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/01_setup_database.sql;
 
--- Create stage for CSV uploads
+-- Load demo data from CSV files (uses Snowpark stored procedure)
 EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/02_load_data.sql;
-```
 
-### Step 3: Upload CSV Data (in Snowsight)
-
-1. In Snowsight, navigate to: **Data → Databases → CUSTOMER_INTELLIGENCE_DB → PUBLIC → Stages**
-2. Click on **DEMO_DATA_STAGE**
-3. Click **"+ Files"** button (top right)
-4. Upload these 4 CSV files from the repo:
-   - `demo_customers.csv`
-   - `demo_usage_events.csv`
-   - `demo_support_tickets.csv`
-   - `demo_churn_events.csv`
-
-5. Run the COPY INTO commands:
-
-```sql
-COPY INTO CUSTOMERS FROM @demo_data_stage/demo_customers.csv ON_ERROR=CONTINUE;
-COPY INTO USAGE_EVENTS FROM @demo_data_stage/demo_usage_events.csv ON_ERROR=CONTINUE;
-COPY INTO SUPPORT_TICKETS FROM @demo_data_stage/demo_support_tickets.csv ON_ERROR=CONTINUE;
-COPY INTO CHURN_EVENTS FROM @demo_data_stage/demo_churn_events.csv ON_ERROR=CONTINUE;
-
--- Verify data loaded
-SELECT 'CUSTOMERS' as tbl, COUNT(*) as rows FROM CUSTOMERS
-UNION ALL SELECT 'USAGE_EVENTS', COUNT(*) FROM USAGE_EVENTS
-UNION ALL SELECT 'SUPPORT_TICKETS', COUNT(*) FROM SUPPORT_TICKETS
-UNION ALL SELECT 'CHURN_EVENTS', COUNT(*) FROM CHURN_EVENTS;
-```
-
-### Step 4: Create Cortex Services (in Snowsight)
-
-```sql
 -- Create Cortex Search services
 EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/03_setup_cortex_search.sql;
 
@@ -133,7 +103,16 @@ EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/05_setup_ud
 EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/06_setup_cortex_agents.sql;
 ```
 
-### Step 5: Update Repository (Optional)
+### Step 3: Verify Data Loaded
+
+```sql
+SELECT 'CUSTOMERS' as table_name, COUNT(*) as row_count FROM CUSTOMERS
+UNION ALL SELECT 'USAGE_EVENTS', COUNT(*) FROM USAGE_EVENTS
+UNION ALL SELECT 'SUPPORT_TICKETS', COUNT(*) FROM SUPPORT_TICKETS
+UNION ALL SELECT 'CHURN_EVENTS', COUNT(*) FROM CHURN_EVENTS;
+```
+
+### Step 4: Update Repository (Optional)
 
 Pull latest changes:
 
@@ -192,7 +171,7 @@ agent_schema = "AGENTS"                     # Your agent schema
 |--------|---------|
 | `00_run_all_setup.sql` | Master script with Git integration setup |
 | `01_setup_database.sql` | Creates database, schema, and tables |
-| `02_load_data.sql` | Creates stage & COPY INTO commands for CSV data |
+| `02_load_data.sql` | Loads CSV data from Git repo via Snowpark |
 | `03_setup_cortex_search.sql` | Creates Cortex Search service |
 | `04_create_semantic_views.sql` | Creates Semantic Views for Cortex Analyst |
 | `05_setup_udfs.sql` | Creates AI UDFs (tools for agents) |

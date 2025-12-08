@@ -1,5 +1,5 @@
 -- ============================================================================
--- 04_setup_udfs.sql
+-- 05_setup_udfs.sql
 -- Creates custom AI UDFs (tools for agents)
 -- Run BEFORE agents since agents use these as tools
 -- ============================================================================

@@ -51,30 +51,10 @@ LS @CUSTOMER_INTELLIGENCE_DB.PUBLIC.customer_intelligence_demo/branches/main/sql
 EXECUTE IMMEDIATE FROM @CUSTOMER_INTELLIGENCE_DB.PUBLIC.customer_intelligence_demo/branches/main/sql/01_setup_database.sql;
 
 -- ============================================================================
--- STEP 2: LOAD DEMO DATA (UPLOAD CSVs VIA SNOWSIGHT)
+-- STEP 2: LOAD DEMO DATA FROM CSV FILES
 -- ============================================================================
--- This creates a stage for CSV uploads. You'll need to:
--- 1. Run the SQL below to create the stage
--- 2. In Snowsight: Data > Databases > CUSTOMER_INTELLIGENCE_DB > PUBLIC > Stages
--- 3. Click DEMO_DATA_STAGE, then "+ Files" to upload:
---    - demo_customers.csv
---    - demo_usage_events.csv  
---    - demo_support_tickets.csv
---    - demo_churn_events.csv
--- 4. Then run the COPY INTO commands in 02_load_data.sql
--- ============================================================================
+-- Uses a Snowpark stored procedure to read CSVs directly from the Git repo
 EXECUTE IMMEDIATE FROM @CUSTOMER_INTELLIGENCE_DB.PUBLIC.customer_intelligence_demo/branches/main/sql/02_load_data.sql;
-
--- ============================================================================
--- ⚠️  PAUSE HERE - Upload CSV files via Snowsight before continuing!
--- ============================================================================
--- After uploading files to DEMO_DATA_STAGE, run the COPY INTO commands:
---
--- COPY INTO CUSTOMERS FROM @demo_data_stage/demo_customers.csv ON_ERROR=CONTINUE;
--- COPY INTO USAGE_EVENTS FROM @demo_data_stage/demo_usage_events.csv ON_ERROR=CONTINUE;
--- COPY INTO SUPPORT_TICKETS FROM @demo_data_stage/demo_support_tickets.csv ON_ERROR=CONTINUE;
--- COPY INTO CHURN_EVENTS FROM @demo_data_stage/demo_churn_events.csv ON_ERROR=CONTINUE;
--- ============================================================================
 
 -- ============================================================================
 -- STEP 3: CREATE CORTEX SEARCH SERVICES

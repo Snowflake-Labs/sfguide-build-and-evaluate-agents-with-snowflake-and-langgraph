@@ -1,5 +1,5 @@
 -- ============================================================================
--- 05_setup_cortex_agents.sql
+-- 06_setup_cortex_agents.sql
 -- Creates the three Cortex Agents for the multi-agent demo
 -- Run AFTER UDFs are created (04_setup_udfs.sql) since agents use UDFs as tools
 -- ============================================================================
