@@ -3,7 +3,7 @@
 -- Creates Cortex Search services for the agents
 -- ============================================================================
 
--- TODO: Update YOUR_WAREHOUSE with your actual warehouse name
+-- TODO: Update COMPUTE_WH with your actual warehouse name
 
 -- ============================================================================
 -- SUPPORT TICKETS SEARCH SERVICE
@@ -12,7 +12,7 @@
 CREATE OR REPLACE CORTEX SEARCH SERVICE CUSTOMER_INTELLIGENCE_DB.PUBLIC.SUPPORT_TICKETS_SEARCH
 ON ticket_text
 ATTRIBUTES customer_id, ticket_id, category, priority, status, created_date
-WAREHOUSE = YOUR_WAREHOUSE
+WAREHOUSE = COMPUTE_WH
 TARGET_LAG = '1 hour'
 AS (
     SELECT 
@@ -33,7 +33,7 @@ AS (
 CREATE OR REPLACE CORTEX SEARCH SERVICE CUSTOMER_INTELLIGENCE_DB.PUBLIC.CUSTOMERS_SEARCH
 ON industry
 ATTRIBUTES customer_id, plan_type, company_size, status, monthly_revenue
-WAREHOUSE = YOUR_WAREHOUSE
+WAREHOUSE = COMPUTE_WH
 TARGET_LAG = '1 hour'
 AS (
     SELECT 
