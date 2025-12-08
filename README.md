@@ -60,14 +60,14 @@ Run this in Snowsight to clone the repo:
 
 ```sql
 -- Create API integration for GitHub (public repo, no secrets needed)
-CREATE OR REPLACE API INTEGRATION github_api_integration
+CREATE API INTEGRATION IF NOT EXISTS github_api_integration
     API_PROVIDER = git_https_api
     API_ALLOWED_PREFIXES = ('https://github.com/Snowflake-Labs/')
     ENABLED = TRUE;
 
 -- Create database for demo
-CREATE DATABASE IF NOT EXISTS BUILD_2025;
-USE DATABASE BUILD_2025;
+CREATE DATABASE IF NOT EXISTS CUSTOMER_INTELLIGENCE_DB;
+USE DATABASE CUSTOMER_INTELLIGENCE_DB;
 CREATE SCHEMA IF NOT EXISTS PUBLIC;
 USE SCHEMA PUBLIC;
 
@@ -86,25 +86,31 @@ LS @customer_intelligence_demo/branches/main/sql/;
 Execute each SQL script directly from the repository:
 
 ```sql
--- 1. Set up database and tables
+-- 1. Set up database, tables, and load demo data
 EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/01_setup_database.sql;
 
--- 2. Generate demo data (run locally - see Step 3)
-
--- 3. Set up Cortex Search services
+-- 2. Set up Cortex Search services
 EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/02_setup_cortex_search.sql;
 
--- 4. Create Semantic Views for Cortex Analyst
+-- 3. Create Semantic Views for Cortex Analyst
 EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/03_create_semantic_views.sql;
 
--- 5. Create custom AI UDFs (tools for agents)
+-- 4. Create custom AI UDFs (tools for agents)
 EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/04_setup_udfs.sql;
 
--- 6. Create Cortex Agents
+-- 5. Create Cortex Agents
 EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/05_setup_cortex_agents.sql;
 ```
 
-### Step 3: Generate Demo Data (Local)
+### Step 3: Update Repository (Optional)
+
+Pull latest changes from GitHub:
+
+```sql
+ALTER GIT REPOSITORY customer_intelligence_demo FETCH;
+```
+
+### Alternative: Generate Custom Data Locally
 
 The data generation requires Python. Run locally:
 
@@ -152,7 +158,7 @@ Edit `.env`:
 SNOWFLAKE_ACCOUNT=your_account_identifier
 SNOWFLAKE_USER=your_username
 SNOWFLAKE_PASSWORD=your_password
-SNOWFLAKE_DATABASE=BUILD_2025
+SNOWFLAKE_DATABASE=CUSTOMER_INTELLIGENCE_DB
 SNOWFLAKE_SCHEMA=PUBLIC
 SNOWFLAKE_WAREHOUSE=your_warehouse
 SNOWFLAKE_ROLE=your_role

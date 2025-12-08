@@ -133,12 +133,12 @@ CREATE AGENT IF NOT EXISTS CONTENT_AGENT
 
   tool_resources:
     CUSTOMER_FEEDBACK_SEARCH:
-      name: "BUILD_2025.PUBLIC.SUPPORT_TICKETS_SEARCH"
+      name: "CUSTOMER_INTELLIGENCE_DB.PUBLIC.SUPPORT_TICKETS_SEARCH"
       max_results: 10
       id_column: "ticket_id"
       title_column: "ticket_text"
     CUSTOMER_CONTENT_ANALYZER:
-      procedure_name: "BUILD_2025.PUBLIC.AI_ANALYZE_CUSTOMER_CONTENT_V2"
+      procedure_name: "CUSTOMER_INTELLIGENCE_DB.PUBLIC.AI_ANALYZE_CUSTOMER_CONTENT_V2"
   $$;
 
 -- ============================================================================
@@ -244,9 +244,9 @@ CREATE AGENT IF NOT EXISTS DATA_ANALYST_AGENT
 
   tool_resources:
     BUSINESS_INTELLIGENCE_ANALYST:
-      semantic_view: "BUILD_2025.PUBLIC.CUSTOMER_BEHAVIOR_ANALYST"
+      semantic_view: "CUSTOMER_INTELLIGENCE_DB.PUBLIC.CUSTOMER_BEHAVIOR_ANALYST"
     CUSTOMER_BEHAVIOR_ANALYZER:
-      procedure_name: "BUILD_2025.PUBLIC.AI_ANALYZE_CUSTOMER_BEHAVIOR_SEGMENT_V2"
+      procedure_name: "CUSTOMER_INTELLIGENCE_DB.PUBLIC.AI_ANALYZE_CUSTOMER_BEHAVIOR_SEGMENT_V2"
   $$;
 
 -- ============================================================================
@@ -352,9 +352,9 @@ CREATE AGENT IF NOT EXISTS RESEARCH_AGENT
 
   tool_resources:
     STRATEGIC_MARKET_ANALYST:
-      semantic_view: "BUILD_2025.PUBLIC.STRATEGIC_RESEARCH_ANALYST"
+      semantic_view: "CUSTOMER_INTELLIGENCE_DB.PUBLIC.STRATEGIC_RESEARCH_ANALYST"
     CUSTOMER_SEGMENT_INTELLIGENCE:
-      procedure_name: "BUILD_2025.PUBLIC.AI_ANALYZE_CUSTOMER_SEGMENT_V2"
+      procedure_name: "CUSTOMER_INTELLIGENCE_DB.PUBLIC.AI_ANALYZE_CUSTOMER_SEGMENT_V2"
   $$;
 
 -- ============================================================================

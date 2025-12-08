@@ -4,8 +4,8 @@
 -- ============================================================================
 
 -- Create database
-CREATE DATABASE IF NOT EXISTS BUILD_2025;
-USE DATABASE BUILD_2025;
+CREATE DATABASE IF NOT EXISTS CUSTOMER_INTELLIGENCE_DB;
+USE DATABASE CUSTOMER_INTELLIGENCE_DB;
 
 -- Create schema
 CREATE SCHEMA IF NOT EXISTS PUBLIC;
@@ -67,6 +67,47 @@ CREATE OR REPLACE TABLE CHURN_EVENTS (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
 );
 
--- Verify tables created
-SHOW TABLES IN SCHEMA BUILD_2025.PUBLIC;
+-- ============================================================================
+-- LOAD DEMO DATA FROM CSV FILES
+-- Note: These COPY INTO commands load from the Git repository stage
+-- The repo must be cloned first: @customer_intelligence_demo
+-- ============================================================================
 
+-- Load customers data
+COPY INTO CUSTOMERS (customer_id, signup_date, plan_type, company_size, industry, status, monthly_revenue)
+FROM @customer_intelligence_demo/branches/main/
+FILES = ('demo_customers.csv')
+FILE_FORMAT = (TYPE = CSV SKIP_HEADER = 1 FIELD_OPTIONALLY_ENCLOSED_BY = '"')
+ON_ERROR = CONTINUE;
+
+-- Load usage events data
+COPY INTO USAGE_EVENTS (event_id, customer_id, event_date, feature_used, session_duration_minutes, actions_count)
+FROM @customer_intelligence_demo/branches/main/
+FILES = ('demo_usage_events.csv')
+FILE_FORMAT = (TYPE = CSV SKIP_HEADER = 1 FIELD_OPTIONALLY_ENCLOSED_BY = '"')
+ON_ERROR = CONTINUE;
+
+-- Load support tickets data
+COPY INTO SUPPORT_TICKETS (ticket_id, customer_id, created_date, category, priority, status, resolution_time_hours, satisfaction_score, ticket_text)
+FROM @customer_intelligence_demo/branches/main/
+FILES = ('demo_support_tickets.csv')
+FILE_FORMAT = (TYPE = CSV SKIP_HEADER = 1 FIELD_OPTIONALLY_ENCLOSED_BY = '"')
+ON_ERROR = CONTINUE;
+
+-- Load churn events data
+COPY INTO CHURN_EVENTS (churn_id, customer_id, churn_date, churn_reason, days_since_signup, final_mrr)
+FROM @customer_intelligence_demo/branches/main/
+FILES = ('demo_churn_events.csv')
+FILE_FORMAT = (TYPE = CSV SKIP_HEADER = 1 FIELD_OPTIONALLY_ENCLOSED_BY = '"')
+ON_ERROR = CONTINUE;
+
+-- ============================================================================
+-- VERIFY SETUP
+-- ============================================================================
+SHOW TABLES IN SCHEMA CUSTOMER_INTELLIGENCE_DB.PUBLIC;
+
+-- Verify data loaded
+SELECT 'CUSTOMERS' as table_name, COUNT(*) as row_count FROM CUSTOMERS
+UNION ALL SELECT 'USAGE_EVENTS', COUNT(*) FROM USAGE_EVENTS
+UNION ALL SELECT 'SUPPORT_TICKETS', COUNT(*) FROM SUPPORT_TICKETS
+UNION ALL SELECT 'CHURN_EVENTS', COUNT(*) FROM CHURN_EVENTS;

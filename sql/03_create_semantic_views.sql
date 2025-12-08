@@ -4,7 +4,7 @@
 -- Reference: https://docs.snowflake.com/en/sql-reference/sql/create-semantic-view
 -- ============================================================================
 
-USE DATABASE BUILD_2025;
+USE DATABASE CUSTOMER_INTELLIGENCE_DB;
 USE SCHEMA PUBLIC;
 
 -- ============================================================================
@@ -19,20 +19,20 @@ CREATE OR REPLACE SEMANTIC VIEW CUSTOMER_BEHAVIOR_ANALYST
   
   TABLES (
     -- CUSTOMERS table
-    CUSTOMERS AS BUILD_2025.PUBLIC.CUSTOMERS
+    CUSTOMERS AS CUSTOMER_INTELLIGENCE_DB.PUBLIC.CUSTOMERS
       PRIMARY KEY (CUSTOMER_ID)
       COMMENT = 'Customer master data including demographics, plan type, and revenue',
     
     -- USAGE_EVENTS table
-    USAGE_EVENTS AS BUILD_2025.PUBLIC.USAGE_EVENTS
+    USAGE_EVENTS AS CUSTOMER_INTELLIGENCE_DB.PUBLIC.USAGE_EVENTS
       COMMENT = 'Customer product usage events and session data',
     
     -- SUPPORT_TICKETS table
-    SUPPORT_TICKETS AS BUILD_2025.PUBLIC.SUPPORT_TICKETS
+    SUPPORT_TICKETS AS CUSTOMER_INTELLIGENCE_DB.PUBLIC.SUPPORT_TICKETS
       COMMENT = 'Customer support tickets and satisfaction data',
     
     -- CHURN_EVENTS table
-    CHURN_EVENTS AS BUILD_2025.PUBLIC.CHURN_EVENTS
+    CHURN_EVENTS AS CUSTOMER_INTELLIGENCE_DB.PUBLIC.CHURN_EVENTS
       COMMENT = 'Customer churn events with reasons and final revenue'
   )
   
@@ -247,22 +247,22 @@ CREATE OR REPLACE SEMANTIC VIEW STRATEGIC_RESEARCH_ANALYST
   
   TABLES (
     -- CUSTOMERS table
-    CUSTOMERS AS BUILD_2025.PUBLIC.CUSTOMERS
+    CUSTOMERS AS CUSTOMER_INTELLIGENCE_DB.PUBLIC.CUSTOMERS
       PRIMARY KEY (CUSTOMER_ID)
       COMMENT = 'Customer master data for strategic analysis',
     
     -- USAGE_EVENTS table
-    USAGE_EVENTS AS BUILD_2025.PUBLIC.USAGE_EVENTS
+    USAGE_EVENTS AS CUSTOMER_INTELLIGENCE_DB.PUBLIC.USAGE_EVENTS
       PRIMARY KEY (EVENT_ID)
       COMMENT = 'Platform usage data for engagement analysis',
     
     -- SUPPORT_TICKETS table
-    SUPPORT_TICKETS AS BUILD_2025.PUBLIC.SUPPORT_TICKETS
+    SUPPORT_TICKETS AS CUSTOMER_INTELLIGENCE_DB.PUBLIC.SUPPORT_TICKETS
       PRIMARY KEY (TICKET_ID)
       COMMENT = 'Support interactions for service quality analysis',
     
     -- CHURN_EVENTS table
-    CHURN_EVENTS AS BUILD_2025.PUBLIC.CHURN_EVENTS
+    CHURN_EVENTS AS CUSTOMER_INTELLIGENCE_DB.PUBLIC.CHURN_EVENTS
       PRIMARY KEY (CHURN_ID)
       COMMENT = 'Churn data for retention and risk analysis'
   )
@@ -459,5 +459,5 @@ DESCRIBE SEMANTIC VIEW STRATEGIC_RESEARCH_ANALYST;
 -- ============================================================================
 -- Show all semantic views
 -- ============================================================================
-SHOW SEMANTIC VIEWS IN SCHEMA BUILD_2025.PUBLIC;
+SHOW SEMANTIC VIEWS IN SCHEMA CUSTOMER_INTELLIGENCE_DB.PUBLIC;
 

@@ -4,7 +4,7 @@
 -- Run BEFORE agents since agents use these as tools
 -- ============================================================================
 
-USE DATABASE BUILD_2025;
+USE DATABASE CUSTOMER_INTELLIGENCE_DB;
 USE SCHEMA PUBLIC;
 
 -- ============================================================================
@@ -13,7 +13,7 @@ USE SCHEMA PUBLIC;
 -- Purpose: Strategic customer segment analysis with AI insights
 -- ============================================================================
 
-CREATE OR REPLACE FUNCTION BUILD_2025.PUBLIC.AI_ANALYZE_CUSTOMER_SEGMENT_V2("CUSTOMER_IDS_STRING" VARCHAR, "SEGMENT_NAME" VARCHAR DEFAULT 'high_value_customers')
+CREATE OR REPLACE FUNCTION CUSTOMER_INTELLIGENCE_DB.PUBLIC.AI_ANALYZE_CUSTOMER_SEGMENT_V2("CUSTOMER_IDS_STRING" VARCHAR, "SEGMENT_NAME" VARCHAR DEFAULT 'high_value_customers')
 RETURNS VARIANT
 LANGUAGE SQL
 AS '
@@ -121,7 +121,7 @@ FROM segment_summary
 -- Purpose: Sentiment analysis, feedback analysis, support ticket insights
 -- ============================================================================
 
-CREATE OR REPLACE FUNCTION BUILD_2025.PUBLIC.AI_ANALYZE_CUSTOMER_CONTENT_V2("CUSTOMER_IDS_STRING" VARCHAR, "ANALYSIS_TYPE" VARCHAR DEFAULT 'recent_support_tickets')
+CREATE OR REPLACE FUNCTION CUSTOMER_INTELLIGENCE_DB.PUBLIC.AI_ANALYZE_CUSTOMER_CONTENT_V2("CUSTOMER_IDS_STRING" VARCHAR, "ANALYSIS_TYPE" VARCHAR DEFAULT 'recent_support_tickets')
 RETURNS VARIANT
 LANGUAGE SQL
 AS '
@@ -203,7 +203,7 @@ FROM ai_content_analysis
 -- Purpose: Usage patterns, engagement metrics, churn risk assessment
 -- ============================================================================
 
-CREATE OR REPLACE FUNCTION BUILD_2025.PUBLIC.AI_ANALYZE_CUSTOMER_BEHAVIOR_SEGMENT_V2("CUSTOMER_IDS_STRING" VARCHAR, "ANALYSIS_DAYS" NUMBER(38,0) DEFAULT 30)
+CREATE OR REPLACE FUNCTION CUSTOMER_INTELLIGENCE_DB.PUBLIC.AI_ANALYZE_CUSTOMER_BEHAVIOR_SEGMENT_V2("CUSTOMER_IDS_STRING" VARCHAR, "ANALYSIS_DAYS" NUMBER(38,0) DEFAULT 30)
 RETURNS VARIANT
 LANGUAGE SQL
 AS '
@@ -323,4 +323,4 @@ FROM churn_risk_calculation
 -- ============================================================================
 -- Verify UDFs created
 -- ============================================================================
-SHOW USER FUNCTIONS IN SCHEMA BUILD_2025.PUBLIC;
+SHOW USER FUNCTIONS IN SCHEMA CUSTOMER_INTELLIGENCE_DB.PUBLIC;
