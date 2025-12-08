@@ -6,7 +6,12 @@
 --
 -- Run this script in Snowsight to set up the entire demo.
 --
--- PREREQUISITE: Push all changes to GitHub first, then run this script.
+-- WORKFLOW:
+-- 1. Make changes in your GitHub Codespace/workspace
+-- 2. Commit and sync changes to GitHub
+-- 3. In Snowsight: Go to Data > Databases > CUSTOMER_INTELLIGENCE_DB > 
+--    Git Repositories > customer_intelligence_demo > Click "Fetch" button
+-- 4. Run this script (or individual EXECUTE IMMEDIATE statements)
 --
 -- ============================================================================
 
@@ -91,7 +96,11 @@ SHOW AGENTS IN SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;
 SELECT '🎉 SETUP COMPLETE! Ready to run langgraph dev' as status;
 
 -- ============================================================================
--- OPTIONAL: REFRESH FROM GIT
+-- REFRESH FROM GIT (After making changes)
 -- ============================================================================
--- To pull latest changes:
--- ALTER GIT REPOSITORY customer_intelligence_demo FETCH;
+-- Option 1: In Snowsight UI
+--   Data > Databases > CUSTOMER_INTELLIGENCE_DB > Git Repositories > 
+--   customer_intelligence_demo > Click "Fetch" button
+--
+-- Option 2: Via SQL (may not work in all environments)
+--   ALTER GIT REPOSITORY customer_intelligence_demo FETCH;

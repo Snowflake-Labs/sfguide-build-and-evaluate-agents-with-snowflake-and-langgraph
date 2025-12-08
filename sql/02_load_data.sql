@@ -9,7 +9,7 @@ USE SCHEMA PUBLIC;
 -- ============================================================================
 -- CREATE FILE FORMAT FOR CSV PARSING
 -- ============================================================================
-CREATE OR REPLACE FILE FORMAT csv_format
+CREATE OR REPLACE FILE FORMAT CUSTOMER_INTELLIGENCE_DB.PUBLIC.csv_format
     TYPE = CSV
     SKIP_HEADER = 1
     FIELD_OPTIONALLY_ENCLOSED_BY = '"'
@@ -21,13 +21,13 @@ CREATE OR REPLACE FILE FORMAT csv_format
 -- ============================================================================
 
 -- Clear existing data
-TRUNCATE TABLE IF EXISTS CUSTOMERS;
-TRUNCATE TABLE IF EXISTS USAGE_EVENTS;
-TRUNCATE TABLE IF EXISTS SUPPORT_TICKETS;
-TRUNCATE TABLE IF EXISTS CHURN_EVENTS;
+TRUNCATE TABLE IF EXISTS CUSTOMER_INTELLIGENCE_DB.PUBLIC.CUSTOMERS;
+TRUNCATE TABLE IF EXISTS CUSTOMER_INTELLIGENCE_DB.PUBLIC.USAGE_EVENTS;
+TRUNCATE TABLE IF EXISTS CUSTOMER_INTELLIGENCE_DB.PUBLIC.SUPPORT_TICKETS;
+TRUNCATE TABLE IF EXISTS CUSTOMER_INTELLIGENCE_DB.PUBLIC.CHURN_EVENTS;
 
 -- Load CUSTOMERS
-INSERT INTO CUSTOMERS (customer_id, signup_date, plan_type, company_size, industry, status, monthly_revenue)
+INSERT INTO CUSTOMER_INTELLIGENCE_DB.PUBLIC.CUSTOMERS (customer_id, signup_date, plan_type, company_size, industry, status, monthly_revenue)
 SELECT 
     $1::VARCHAR,           -- customer_id
     $2::DATE,              -- signup_date
@@ -36,11 +36,11 @@ SELECT
     $5::VARCHAR,           -- industry
     $6::VARCHAR,           -- status
     $7::DECIMAL(10,2)      -- monthly_revenue
-FROM @customer_intelligence_demo/branches/main/demo_customers.csv
-(FILE_FORMAT => csv_format);
+FROM @CUSTOMER_INTELLIGENCE_DB.PUBLIC.customer_intelligence_demo/branches/main/demo_customers.csv
+(FILE_FORMAT => CUSTOMER_INTELLIGENCE_DB.PUBLIC.csv_format);
 
 -- Load USAGE_EVENTS
-INSERT INTO USAGE_EVENTS (event_id, customer_id, event_date, feature_used, session_duration_minutes, actions_count)
+INSERT INTO CUSTOMER_INTELLIGENCE_DB.PUBLIC.USAGE_EVENTS (event_id, customer_id, event_date, feature_used, session_duration_minutes, actions_count)
 SELECT 
     $1::VARCHAR,           -- event_id
     $2::VARCHAR,           -- customer_id
@@ -48,11 +48,11 @@ SELECT
     $4::VARCHAR,           -- feature_used
     $5::INTEGER,           -- session_duration_minutes
     $6::INTEGER            -- actions_count
-FROM @customer_intelligence_demo/branches/main/demo_usage_events.csv
-(FILE_FORMAT => csv_format);
+FROM @CUSTOMER_INTELLIGENCE_DB.PUBLIC.customer_intelligence_demo/branches/main/demo_usage_events.csv
+(FILE_FORMAT => CUSTOMER_INTELLIGENCE_DB.PUBLIC.csv_format);
 
 -- Load SUPPORT_TICKETS
-INSERT INTO SUPPORT_TICKETS (ticket_id, customer_id, created_date, category, priority, status, resolution_time_hours, satisfaction_score, ticket_text)
+INSERT INTO CUSTOMER_INTELLIGENCE_DB.PUBLIC.SUPPORT_TICKETS (ticket_id, customer_id, created_date, category, priority, status, resolution_time_hours, satisfaction_score, ticket_text)
 SELECT 
     $1::VARCHAR,           -- ticket_id
     $2::VARCHAR,           -- customer_id
@@ -63,11 +63,11 @@ SELECT
     $7::INTEGER,           -- resolution_time_hours
     $8::INTEGER,           -- satisfaction_score
     $9::VARCHAR            -- ticket_text
-FROM @customer_intelligence_demo/branches/main/demo_support_tickets.csv
-(FILE_FORMAT => csv_format);
+FROM @CUSTOMER_INTELLIGENCE_DB.PUBLIC.customer_intelligence_demo/branches/main/demo_support_tickets.csv
+(FILE_FORMAT => CUSTOMER_INTELLIGENCE_DB.PUBLIC.csv_format);
 
 -- Load CHURN_EVENTS
-INSERT INTO CHURN_EVENTS (churn_id, customer_id, churn_date, churn_reason, days_since_signup, final_plan_type, final_monthly_revenue)
+INSERT INTO CUSTOMER_INTELLIGENCE_DB.PUBLIC.CHURN_EVENTS (churn_id, customer_id, churn_date, churn_reason, days_since_signup, final_plan_type, final_monthly_revenue)
 SELECT 
     $1::VARCHAR,           -- churn_id
     $2::VARCHAR,           -- customer_id
@@ -76,13 +76,13 @@ SELECT
     $5::INTEGER,           -- days_since_signup
     $6::VARCHAR,           -- final_plan_type
     $7::DECIMAL(10,2)      -- final_monthly_revenue
-FROM @customer_intelligence_demo/branches/main/demo_churn_events.csv
-(FILE_FORMAT => csv_format);
+FROM @CUSTOMER_INTELLIGENCE_DB.PUBLIC.customer_intelligence_demo/branches/main/demo_churn_events.csv
+(FILE_FORMAT => CUSTOMER_INTELLIGENCE_DB.PUBLIC.csv_format);
 
 -- ============================================================================
 -- VERIFY DATA LOADED
 -- ============================================================================
-SELECT 'CUSTOMERS' as table_name, COUNT(*) as row_count FROM CUSTOMERS
-UNION ALL SELECT 'USAGE_EVENTS', COUNT(*) FROM USAGE_EVENTS
-UNION ALL SELECT 'SUPPORT_TICKETS', COUNT(*) FROM SUPPORT_TICKETS
-UNION ALL SELECT 'CHURN_EVENTS', COUNT(*) FROM CHURN_EVENTS;
+SELECT 'CUSTOMERS' as table_name, COUNT(*) as row_count FROM CUSTOMER_INTELLIGENCE_DB.PUBLIC.CUSTOMERS
+UNION ALL SELECT 'USAGE_EVENTS', COUNT(*) FROM CUSTOMER_INTELLIGENCE_DB.PUBLIC.USAGE_EVENTS
+UNION ALL SELECT 'SUPPORT_TICKETS', COUNT(*) FROM CUSTOMER_INTELLIGENCE_DB.PUBLIC.SUPPORT_TICKETS
+UNION ALL SELECT 'CHURN_EVENTS', COUNT(*) FROM CUSTOMER_INTELLIGENCE_DB.PUBLIC.CHURN_EVENTS;
