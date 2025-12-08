@@ -4,11 +4,9 @@
 -- Reference: https://docs.snowflake.com/en/developer-guide/git/git-overview
 -- ============================================================================
 --
--- This script clones the GitHub repo into Snowflake and runs all setup scripts
--- directly from the Git repository.
+-- Run this script in Snowsight to set up the entire demo.
 --
--- BEFORE RUNNING: Update these placeholders:
---   - YOUR_WAREHOUSE: Your Snowflake warehouse name (in 02_setup_cortex_search.sql)
+-- PREREQUISITE: Push all changes to GitHub first, then run this script.
 --
 -- ============================================================================
 
@@ -16,114 +14,84 @@
 -- STEP 0: SET UP GIT INTEGRATION
 -- ============================================================================
 
--- Use ACCOUNTADMIN role for setup (or a role with CREATE INTEGRATION privilege)
 USE ROLE ACCOUNTADMIN;
 
--- Create a database for the demo if it doesn't exist
 CREATE DATABASE IF NOT EXISTS CUSTOMER_INTELLIGENCE_DB;
 USE DATABASE CUSTOMER_INTELLIGENCE_DB;
 CREATE SCHEMA IF NOT EXISTS PUBLIC;
 USE SCHEMA PUBLIC;
 
--- Create API integration for GitHub (public repos don't need secrets)
+-- Create API integration for GitHub
 CREATE API INTEGRATION IF NOT EXISTS github_api_integration
-  API_PROVIDER = git_https_api
-  API_ALLOWED_PREFIXES = ('https://github.com/Snowflake-Labs/')
-  ENABLED = TRUE;
+    API_PROVIDER = git_https_api
+    API_ALLOWED_PREFIXES = ('https://github.com/Snowflake-Labs/')
+    ENABLED = TRUE;
 
--- Create the Git repository object pointing to the snowflake-labs repo
-CREATE OR REPLACE GIT REPOSITORY CUSTOMER_INTELLIGENCE_DB.PUBLIC.customer_intelligence_demo
-  API_INTEGRATION = github_api_integration
-  ORIGIN = 'https://github.com/Snowflake-Labs/sfguide-build-and-evaluate-agents-with-snowflake-and-langgraph.git';
+-- Clone the GitHub repository
+CREATE OR REPLACE GIT REPOSITORY customer_intelligence_demo
+    API_INTEGRATION = github_api_integration
+    ORIGIN = 'https://github.com/Snowflake-Labs/sfguide-build-and-evaluate-agents-with-snowflake-and-langgraph.git';
 
--- Fetch the latest from the remote repository
-ALTER GIT REPOSITORY CUSTOMER_INTELLIGENCE_DB.PUBLIC.customer_intelligence_demo FETCH;
+-- Fetch latest from GitHub
+ALTER GIT REPOSITORY customer_intelligence_demo FETCH;
 
--- View available branches
-SHOW GIT BRANCHES IN CUSTOMER_INTELLIGENCE_DB.PUBLIC.customer_intelligence_demo;
-
--- List files in the sql directory (main branch)
-LS @CUSTOMER_INTELLIGENCE_DB.PUBLIC.customer_intelligence_demo/branches/main/sql/;
+-- Verify repository
+SHOW GIT BRANCHES IN customer_intelligence_demo;
+LS @customer_intelligence_demo/branches/main/sql/;
 
 -- ============================================================================
 -- STEP 1: CREATE DATABASE AND TABLES
 -- ============================================================================
-EXECUTE IMMEDIATE FROM @CUSTOMER_INTELLIGENCE_DB.PUBLIC.customer_intelligence_demo/branches/main/sql/01_setup_database.sql;
+EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/01_setup_database.sql;
 
 -- ============================================================================
 -- STEP 2: LOAD DEMO DATA FROM CSV FILES
 -- ============================================================================
--- Uses a Snowpark stored procedure to read CSVs directly from the Git repo
-EXECUTE IMMEDIATE FROM @CUSTOMER_INTELLIGENCE_DB.PUBLIC.customer_intelligence_demo/branches/main/sql/02_load_data.sql;
+EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/02_load_data.sql;
 
 -- ============================================================================
 -- STEP 3: CREATE CORTEX SEARCH SERVICES
 -- ============================================================================
-EXECUTE IMMEDIATE FROM @CUSTOMER_INTELLIGENCE_DB.PUBLIC.customer_intelligence_demo/branches/main/sql/03_setup_cortex_search.sql;
+EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/03_setup_cortex_search.sql;
 
 -- ============================================================================
 -- STEP 4: CREATE SEMANTIC VIEWS
 -- ============================================================================
-EXECUTE IMMEDIATE FROM @CUSTOMER_INTELLIGENCE_DB.PUBLIC.customer_intelligence_demo/branches/main/sql/04_create_semantic_views.sql;
+EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/04_create_semantic_views.sql;
 
 -- ============================================================================
 -- STEP 5: CREATE UDFs (Tools for Agents)
 -- ============================================================================
-EXECUTE IMMEDIATE FROM @CUSTOMER_INTELLIGENCE_DB.PUBLIC.customer_intelligence_demo/branches/main/sql/05_setup_udfs.sql;
+EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/05_setup_udfs.sql;
 
 -- ============================================================================
 -- STEP 6: CREATE CORTEX AGENTS
 -- ============================================================================
-EXECUTE IMMEDIATE FROM @CUSTOMER_INTELLIGENCE_DB.PUBLIC.customer_intelligence_demo/branches/main/sql/06_setup_cortex_agents.sql;
+EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/06_setup_cortex_agents.sql;
 
 -- ============================================================================
--- VERIFICATION - Confirm setup completed successfully
+-- VERIFICATION
 -- ============================================================================
 
--- Check tables were created
-SELECT 'TABLES' as check_type, COUNT(*) as count 
-FROM INFORMATION_SCHEMA.TABLES 
-WHERE TABLE_SCHEMA = 'PUBLIC' AND TABLE_CATALOG = 'CUSTOMER_INTELLIGENCE_DB';
+-- Check data loaded
+SELECT 'CUSTOMERS' as table_name, COUNT(*) as row_count FROM CUSTOMERS
+UNION ALL SELECT 'USAGE_EVENTS', COUNT(*) FROM USAGE_EVENTS
+UNION ALL SELECT 'SUPPORT_TICKETS', COUNT(*) FROM SUPPORT_TICKETS
+UNION ALL SELECT 'CHURN_EVENTS', COUNT(*) FROM CHURN_EVENTS;
 
--- Check data was loaded (will show 0 if data_generation.py hasn't been run)
-SELECT 'CUSTOMERS' as table_name, COUNT(*) as row_count FROM CUSTOMER_INTELLIGENCE_DB.PUBLIC.CUSTOMERS
-UNION ALL
-SELECT 'USAGE_EVENTS', COUNT(*) FROM CUSTOMER_INTELLIGENCE_DB.PUBLIC.USAGE_EVENTS
-UNION ALL
-SELECT 'SUPPORT_TICKETS', COUNT(*) FROM CUSTOMER_INTELLIGENCE_DB.PUBLIC.SUPPORT_TICKETS
-UNION ALL
-SELECT 'CHURN_EVENTS', COUNT(*) FROM CUSTOMER_INTELLIGENCE_DB.PUBLIC.CHURN_EVENTS;
-
--- Check Cortex Search services
+-- Check Cortex services
 SHOW CORTEX SEARCH SERVICES IN SCHEMA CUSTOMER_INTELLIGENCE_DB.PUBLIC;
-
--- Check Semantic Views
 SHOW SEMANTIC VIEWS IN SCHEMA CUSTOMER_INTELLIGENCE_DB.PUBLIC;
-
--- Check UDFs
 SHOW USER FUNCTIONS IN SCHEMA CUSTOMER_INTELLIGENCE_DB.PUBLIC;
-
--- Check Cortex Agents
 SHOW AGENTS IN SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;
 
 -- ============================================================================
 -- SETUP COMPLETE!
 -- ============================================================================
--- Next steps:
--- 1. Clone the repo locally: git clone https://github.com/Snowflake-Labs/sfguide-build-and-evaluate-agents-with-snowflake-and-langgraph.git
--- 2. Configure your .env file with Snowflake credentials
--- 3. Run: langgraph dev
--- 4. Open LangGraph Studio and test the multi-agent workflow
--- ============================================================================
-
 SELECT '🎉 SETUP COMPLETE! Ready to run langgraph dev' as status;
 
 -- ============================================================================
 -- OPTIONAL: REFRESH FROM GIT
 -- ============================================================================
--- To pull latest changes from the repo:
--- ALTER GIT REPOSITORY CUSTOMER_INTELLIGENCE_DB.PUBLIC.customer_intelligence_demo FETCH;
---
--- To re-run a specific script after updates:
--- EXECUTE IMMEDIATE FROM @CUSTOMER_INTELLIGENCE_DB.PUBLIC.customer_intelligence_demo/branches/main/sql/05_setup_cortex_agents.sql;
--- ============================================================================
+-- To pull latest changes:
+-- ALTER GIT REPOSITORY customer_intelligence_demo FETCH;
