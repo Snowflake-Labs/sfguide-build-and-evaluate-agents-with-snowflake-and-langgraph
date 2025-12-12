@@ -1,5 +1,5 @@
 -- ============================================================================
--- 05_setup_udfs.sql
+-- 04_setup_udfs.sql
 -- Creates custom AI UDFs (tools for agents)
 -- Run BEFORE agents since agents use these as tools
 -- ============================================================================
@@ -321,6 +321,7 @@ FROM churn_risk_calculation
 ';
 
 -- ============================================================================
--- Verify UDFs created
+-- VERIFY
 -- ============================================================================
 SHOW USER FUNCTIONS IN SCHEMA CUSTOMER_INTELLIGENCE_DB.PUBLIC;
+

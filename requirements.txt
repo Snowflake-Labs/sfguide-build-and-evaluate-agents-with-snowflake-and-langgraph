@@ -17,3 +17,8 @@ numpy>=1.24.0
 # Environment variable management
 python-dotenv>=1.0.0
 
+# TruLens for tracing and evaluation
+trulens>=1.0.0
+trulens-apps-langgraph>=1.0.0
+trulens-providers-cortex>=1.0.0
+trulens-connectors-snowflake>=1.0.0

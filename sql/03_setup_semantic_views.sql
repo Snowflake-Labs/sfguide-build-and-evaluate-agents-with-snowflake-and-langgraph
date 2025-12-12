@@ -1,5 +1,5 @@
 -- ============================================================================
--- 04_create_semantic_views.sql
+-- 03_setup_semantic_views.sql
 -- Creates Semantic Views for Cortex Analyst tools
 -- Reference: https://docs.snowflake.com/en/sql-reference/sql/create-semantic-view
 -- ============================================================================
@@ -221,5 +221,8 @@ CREATE OR REPLACE SEMANTIC VIEW STRATEGIC_RESEARCH_ANALYST
   )
   COMMENT = 'Strategic research and market intelligence for executive-level business analysis';
 
--- Verify
+-- ============================================================================
+-- VERIFY
+-- ============================================================================
 SHOW SEMANTIC VIEWS IN SCHEMA CUSTOMER_INTELLIGENCE_DB.PUBLIC;
+

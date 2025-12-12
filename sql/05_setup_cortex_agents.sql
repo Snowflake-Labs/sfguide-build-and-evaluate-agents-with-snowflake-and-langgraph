@@ -1,5 +1,5 @@
 -- ============================================================================
--- 06_setup_cortex_agents.sql
+-- 05_setup_cortex_agents.sql
 -- Creates the three Cortex Agents for the multi-agent demo
 -- ============================================================================
 
@@ -14,7 +14,7 @@ USE SCHEMA AGENTS;
 -- Tools: Cortex Search (tickets), Customer Content Analyzer UDF
 -- ============================================================================
 
-CREATE AGENT IF NOT EXISTS CONTENT_AGENT
+CREATE OR REPLACE AGENT CONTENT_AGENT
   COMMENT = 'Customer feedback, sentiment analysis, and communication intelligence specialist'
   FROM SPECIFICATION
   $$
@@ -151,7 +151,7 @@ CREATE AGENT IF NOT EXISTS CONTENT_AGENT
 -- Tools: Cortex Analyst (semantic model), Behavior Analysis UDF
 -- ============================================================================
 
-CREATE AGENT IF NOT EXISTS DATA_ANALYST_AGENT
+CREATE OR REPLACE AGENT DATA_ANALYST_AGENT
   COMMENT = 'Customer behavior, business metrics, and predictive analytics specialist'
   FROM SPECIFICATION
   $$
@@ -259,7 +259,7 @@ CREATE AGENT IF NOT EXISTS DATA_ANALYST_AGENT
 -- Tools: Cortex Analyst (strategic research), Customer Segment Intelligence UDF
 -- ============================================================================
 
-CREATE AGENT IF NOT EXISTS RESEARCH_AGENT
+CREATE OR REPLACE AGENT RESEARCH_AGENT
   COMMENT = 'Market intelligence, strategic analysis, and competitive insights specialist'
   FROM SPECIFICATION
   $$
@@ -359,5 +359,18 @@ CREATE AGENT IF NOT EXISTS RESEARCH_AGENT
       identifier: "CUSTOMER_INTELLIGENCE_DB.PUBLIC.AI_ANALYZE_CUSTOMER_SEGMENT_V2"
   $$;
 
--- Verify agents created
+-- ============================================================================
+-- GRANT PERMISSIONS (uncomment and customize for your role)
+-- ============================================================================
+
+-- GRANT USAGE ON DATABASE SNOWFLAKE_INTELLIGENCE TO ROLE <YOUR_ROLE>;
+-- GRANT USAGE ON SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS TO ROLE <YOUR_ROLE>;
+-- GRANT USAGE ON AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.CONTENT_AGENT TO ROLE <YOUR_ROLE>;
+-- GRANT USAGE ON AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.DATA_ANALYST_AGENT TO ROLE <YOUR_ROLE>;
+-- GRANT USAGE ON AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.RESEARCH_AGENT TO ROLE <YOUR_ROLE>;
+
+-- ============================================================================
+-- VERIFY
+-- ============================================================================
 SHOW AGENTS IN SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;
+

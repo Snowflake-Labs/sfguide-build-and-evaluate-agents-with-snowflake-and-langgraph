@@ -1,6 +1,11 @@
 -- ============================================================================
--- 03_setup_cortex_search.sql
+-- 02_setup_cortex_search.sql
 -- Creates Cortex Search services for the agents
+-- ============================================================================
+
+USE DATABASE CUSTOMER_INTELLIGENCE_DB;
+USE SCHEMA PUBLIC;
+
 -- ============================================================================
 -- SUPPORT TICKETS SEARCH SERVICE
 -- Used by CONTENT_AGENT for customer feedback and support analysis
@@ -42,6 +47,8 @@ AS (
     FROM CUSTOMER_INTELLIGENCE_DB.PUBLIC.CUSTOMERS
 );
 
--- Verify search services created
+-- ============================================================================
+-- VERIFY
+-- ============================================================================
 SHOW CORTEX SEARCH SERVICES IN SCHEMA CUSTOMER_INTELLIGENCE_DB.PUBLIC;
 

@@ -50,74 +50,52 @@ A sophisticated multi-agent AI system built with **LangGraph** and **Snowflake C
 
 ---
 
-## Snowflake Setup (Git Integration)
+## Snowflake Setup
 
-This demo uses **Snowflake Git Integration** to clone and run setup scripts directly in Snowflake.
+This demo uses **Snowflake Git Integration** to clone the repository and load data. Run each SQL script in order using Snowsight.
 
-### Step 1: Clone Repository in Snowflake
+### Step 1: Run Setup Scripts (in Snowsight)
 
-Run this in Snowsight to clone the repo:
+Open each SQL script file in Snowsight and run them **in order**:
+
+| Order | Script | Purpose |
+|-------|--------|---------|
+| 1 | `sql/01_setup_database_and_load_data.sql` | Creates database, tables, Git integration, and loads CSV data |
+| 2 | `sql/02_setup_cortex_search.sql` | Creates Cortex Search services |
+| 3 | `sql/03_setup_semantic_views.sql` | Creates Semantic Views for Cortex Analyst |
+| 4 | `sql/04_setup_udfs.sql` | Creates AI UDFs (tools for agents) |
+| 5 | `sql/05_setup_cortex_agents.sql` | Creates the three Cortex Agents |
+
+> **Note:** Run scripts in order as later scripts depend on earlier ones. Each script should be copied and pasted into a Snowsight worksheet and executed.
+
+### Step 2: Verify Data Loaded
+
+After running `01_setup_database_and_load_data.sql`, verify the data:
 
 ```sql
--- Create API integration for GitHub (public repo, no secrets needed)
-CREATE API INTEGRATION IF NOT EXISTS github_api_integration
-    API_PROVIDER = git_https_api
-    API_ALLOWED_PREFIXES = ('https://github.com/Snowflake-Labs/')
-    ENABLED = TRUE;
-
--- Create database for demo
-CREATE DATABASE IF NOT EXISTS CUSTOMER_INTELLIGENCE_DB;
-USE DATABASE CUSTOMER_INTELLIGENCE_DB;
-CREATE SCHEMA IF NOT EXISTS PUBLIC;
-USE SCHEMA PUBLIC;
-
--- Clone the GitHub repository
-CREATE OR REPLACE GIT REPOSITORY customer_intelligence_demo
-    API_INTEGRATION = github_api_integration
-    ORIGIN = 'https://github.com/Snowflake-Labs/sfguide-build-and-evaluate-agents-with-snowflake-and-langgraph.git';
-
--- Verify the repository
-SHOW GIT BRANCHES IN customer_intelligence_demo;
-LS @customer_intelligence_demo/branches/main/sql/;
+SELECT 'CUSTOMERS' as table_name, COUNT(*) as row_count FROM CUSTOMER_INTELLIGENCE_DB.PUBLIC.CUSTOMERS
+UNION ALL SELECT 'USAGE_EVENTS', COUNT(*) FROM CUSTOMER_INTELLIGENCE_DB.PUBLIC.USAGE_EVENTS
+UNION ALL SELECT 'SUPPORT_TICKETS', COUNT(*) FROM CUSTOMER_INTELLIGENCE_DB.PUBLIC.SUPPORT_TICKETS
+UNION ALL SELECT 'CHURN_EVENTS', COUNT(*) FROM CUSTOMER_INTELLIGENCE_DB.PUBLIC.CHURN_EVENTS;
 ```
 
-### Step 2: Run Setup Scripts (in Snowsight)
+### Step 3: Verify Agents Created
+
+After running all scripts:
 
 ```sql
--- Create database and tables
-EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/01_setup_database.sql;
-
--- Load demo data from CSV files (uses Snowpark stored procedure)
-EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/02_load_data.sql;
-
--- Create Cortex Search services
-EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/03_setup_cortex_search.sql;
-
--- Create Semantic Views for Cortex Analyst
-EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/04_create_semantic_views.sql;
-
--- Create custom AI UDFs (tools for agents)
-EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/05_setup_udfs.sql;
-
--- Create Cortex Agents
-EXECUTE IMMEDIATE FROM @customer_intelligence_demo/branches/main/sql/06_setup_cortex_agents.sql;
-```
-
-### Step 3: Verify Data Loaded
-
-```sql
-SELECT 'CUSTOMERS' as table_name, COUNT(*) as row_count FROM CUSTOMERS
-UNION ALL SELECT 'USAGE_EVENTS', COUNT(*) FROM USAGE_EVENTS
-UNION ALL SELECT 'SUPPORT_TICKETS', COUNT(*) FROM SUPPORT_TICKETS
-UNION ALL SELECT 'CHURN_EVENTS', COUNT(*) FROM CHURN_EVENTS;
+SHOW CORTEX SEARCH SERVICES IN SCHEMA CUSTOMER_INTELLIGENCE_DB.PUBLIC;
+SHOW SEMANTIC VIEWS IN SCHEMA CUSTOMER_INTELLIGENCE_DB.PUBLIC;
+SHOW USER FUNCTIONS IN SCHEMA CUSTOMER_INTELLIGENCE_DB.PUBLIC;
+SHOW AGENTS IN SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;
 ```
 
 ### Step 4: Update Repository (Optional)
 
-Pull latest changes:
+To pull latest changes from GitHub:
 
 ```sql
-ALTER GIT REPOSITORY customer_intelligence_demo FETCH;
+ALTER GIT REPOSITORY CUSTOMER_INTELLIGENCE_DB.PUBLIC.customer_intelligence_demo FETCH;
 ```
 
 ---
@@ -169,13 +147,11 @@ agent_schema = "AGENTS"                     # Your agent schema
 
 | Script | Purpose |
 |--------|---------|
-| `00_run_all_setup.sql` | Master script with Git integration setup |
-| `01_setup_database.sql` | Creates database, schema, and tables |
-| `02_load_data.sql` | Loads CSV data from Git repo via Snowpark |
-| `03_setup_cortex_search.sql` | Creates Cortex Search service |
-| `04_create_semantic_views.sql` | Creates Semantic Views for Cortex Analyst |
-| `05_setup_udfs.sql` | Creates AI UDFs (tools for agents) |
-| `06_setup_cortex_agents.sql` | Creates the three Cortex Agents |
+| `01_setup_database_and_load_data.sql` | Creates database, schema, tables, Git integration, and loads demo data |
+| `02_setup_cortex_search.sql` | Creates Cortex Search services for ticket and customer search |
+| `03_setup_semantic_views.sql` | Creates Semantic Views for Cortex Analyst text-to-SQL |
+| `04_setup_udfs.sql` | Creates AI-powered UDFs (tools used by agents) |
+| `05_setup_cortex_agents.sql` | Creates CONTENT_AGENT, DATA_ANALYST_AGENT, and RESEARCH_AGENT |
 
 ## Running the Demo
 
@@ -215,13 +191,11 @@ Try these business scenarios:
 ├── data_generation.py         # Demo data generator
 │
 ├── sql/                       # Snowflake setup scripts
-│   ├── 00_run_all_setup.sql   # Master script (Git integration)
-│   ├── 01_setup_database.sql  # Database, schema, tables
-│   ├── 02_load_data.sql       # Stage creation & CSV loading
-│   ├── 03_setup_cortex_search.sql
-│   ├── 04_create_semantic_views.sql
-│   ├── 05_setup_udfs.sql      # AI UDFs (tools for agents)
-│   └── 06_setup_cortex_agents.sql
+│   ├── 01_setup_database_and_load_data.sql
+│   ├── 02_setup_cortex_search.sql
+│   ├── 03_setup_semantic_views.sql
+│   ├── 04_setup_udfs.sql
+│   └── 05_setup_cortex_agents.sql
 │
 └── README.md
 ```
