@@ -13,8 +13,8 @@ A sophisticated multi-agent AI system built with **LangGraph** and **Snowflake C
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                    SUPERVISOR (Claude)                           │
-│              Routes queries & synthesizes responses              │
+│                      SUPERVISOR (Planning)                       │
+│               Plans execution and routes queries                 │
 └─────────────────────────────────────────────────────────────────┘
                               │
            ┌──────────────────┼──────────────────┐
@@ -30,7 +30,7 @@ A sophisticated multi-agent AI system built with **LangGraph** and **Snowflake C
            └──────────────────┼──────────────────┘
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                 Snowflake AI Tools                               │
+│                 Snowflake AI Tools                              │
 │     Cortex Search │ Cortex Analyst │ Custom AI UDFs             │
 └─────────────────────────────────────────────────────────────────┘
                               │
@@ -52,23 +52,53 @@ A sophisticated multi-agent AI system built with **LangGraph** and **Snowflake C
 
 ## Snowflake Setup
 
-This demo uses **Snowflake Git Integration** to clone the repository and load data. Run each SQL script in order using Snowsight.
+This demo uses **Snowflake Git Integration** to clone the repository and load data.
 
-### Step 1: Run Setup Scripts (in Snowsight)
+### Step 1: Setup Git Integration (in Snowsight)
 
-Open each SQL script file in Snowsight and run them **in order**:
+First, create the database and clone this repository into Snowflake:
+
+```sql
+USE ROLE ACCOUNTADMIN;
+
+CREATE DATABASE IF NOT EXISTS CUSTOMER_INTELLIGENCE_DB;
+USE DATABASE CUSTOMER_INTELLIGENCE_DB;
+CREATE SCHEMA IF NOT EXISTS PUBLIC;
+USE SCHEMA PUBLIC;
+
+-- Create API integration for GitHub
+CREATE API INTEGRATION IF NOT EXISTS github_api_integration
+    API_PROVIDER = git_https_api
+    API_ALLOWED_PREFIXES = ('https://github.com/Snowflake-Labs/')
+    ENABLED = TRUE;
+
+-- Clone the GitHub repository
+CREATE OR REPLACE GIT REPOSITORY customer_intelligence_demo
+    API_INTEGRATION = github_api_integration
+    ORIGIN = 'https://github.com/Snowflake-Labs/sfguide-build-and-evaluate-agents-with-snowflake-and-langgraph.git';
+
+-- Fetch latest from GitHub
+ALTER GIT REPOSITORY customer_intelligence_demo FETCH;
+
+-- Verify repository contents
+LS @customer_intelligence_demo/branches/main/;
+```
+
+### Step 2: Run Setup Scripts
+
+After Git integration is set up, navigate to the SQL scripts in the repository and run them **in order**:
 
 | Order | Script | Purpose |
 |-------|--------|---------|
-| 1 | `sql/01_setup_database_and_load_data.sql` | Creates database, tables, Git integration, and loads CSV data |
+| 1 | `sql/01_setup_database_and_load_data.sql` | Creates tables and loads CSV data |
 | 2 | `sql/02_setup_cortex_search.sql` | Creates Cortex Search services |
 | 3 | `sql/03_setup_semantic_views.sql` | Creates Semantic Views for Cortex Analyst |
 | 4 | `sql/04_setup_udfs.sql` | Creates AI UDFs (tools for agents) |
 | 5 | `sql/05_setup_cortex_agents.sql` | Creates the three Cortex Agents |
 
-> **Note:** Run scripts in order as later scripts depend on earlier ones. Each script should be copied and pasted into a Snowsight worksheet and executed.
+> **Note:** Run scripts in order as later scripts depend on earlier ones.
 
-### Step 2: Verify Data Loaded
+### Step 3: Verify Data Loaded
 
 After running `01_setup_database_and_load_data.sql`, verify the data:
 
@@ -79,7 +109,7 @@ UNION ALL SELECT 'SUPPORT_TICKETS', COUNT(*) FROM CUSTOMER_INTELLIGENCE_DB.PUBLI
 UNION ALL SELECT 'CHURN_EVENTS', COUNT(*) FROM CUSTOMER_INTELLIGENCE_DB.PUBLIC.CHURN_EVENTS;
 ```
 
-### Step 3: Verify Agents Created
+### Step 4: Verify Agents Created
 
 After running all scripts:
 
@@ -90,7 +120,7 @@ SHOW USER FUNCTIONS IN SCHEMA CUSTOMER_INTELLIGENCE_DB.PUBLIC;
 SHOW AGENTS IN SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;
 ```
 
-### Step 4: Update Repository (Optional)
+### Step 5: Update Repository (Optional)
 
 To pull latest changes from GitHub:
 
@@ -147,7 +177,7 @@ agent_schema = "AGENTS"                     # Your agent schema
 
 | Script | Purpose |
 |--------|---------|
-| `01_setup_database_and_load_data.sql` | Creates database, schema, tables, Git integration, and loads demo data |
+| `01_setup_database_and_load_data.sql` | Creates tables and loads demo data from CSV files |
 | `02_setup_cortex_search.sql` | Creates Cortex Search services for ticket and customer search |
 | `03_setup_semantic_views.sql` | Creates Semantic Views for Cortex Analyst text-to-SQL |
 | `04_setup_udfs.sql` | Creates AI-powered UDFs (tools used by agents) |

@@ -1,6 +1,8 @@
 -- ============================================================================
 -- 01_setup_database_and_load_data.sql
 -- Creates the database, schema, tables, and loads demo data from CSV files
+-- 
+-- PREREQUISITE: Git integration must be set up first (see developer guide)
 -- ============================================================================
 
 USE ROLE ACCOUNTADMIN;
@@ -14,28 +16,6 @@ USE DATABASE CUSTOMER_INTELLIGENCE_DB;
 
 CREATE SCHEMA IF NOT EXISTS PUBLIC;
 USE SCHEMA PUBLIC;
-
--- ============================================================================
--- CREATE GIT INTEGRATION (for loading CSV files from repo)
--- ============================================================================
-
--- Create API integration for GitHub (public repo, no secrets needed)
-CREATE API INTEGRATION IF NOT EXISTS github_api_integration
-    API_PROVIDER = git_https_api
-    API_ALLOWED_PREFIXES = ('https://github.com/Snowflake-Labs/')
-    ENABLED = TRUE;
-
--- Clone the GitHub repository
-CREATE OR REPLACE GIT REPOSITORY customer_intelligence_demo
-    API_INTEGRATION = github_api_integration
-    ORIGIN = 'https://github.com/Snowflake-Labs/sfguide-build-and-evaluate-agents-with-snowflake-and-langgraph.git';
-
--- Fetch latest from GitHub
-ALTER GIT REPOSITORY customer_intelligence_demo FETCH;
-
--- Verify repository
-SHOW GIT BRANCHES IN customer_intelligence_demo;
-LS @customer_intelligence_demo/branches/main/;
 
 -- ============================================================================
 -- CUSTOMERS TABLE

@@ -1,14 +1,14 @@
 # LangChain Snowflake Integration
-langchain-snowflake>=0.1.0
+langchain-snowflake>=0.2.2
 
 # LangGraph for multi-agent orchestration
-langgraph>=0.2.0
+langgraph>=0.6.11
 
 # LangChain Core
-langchain-core>=0.3.0
+langchain-core>=0.3.80
 
 # Snowflake Connector
-snowflake-snowpark-python>=1.20.0
+snowflake-snowpark-python>=1.42.0
 
 # Data processing (for data_generation.py)
 pandas>=2.0.0
@@ -18,7 +18,7 @@ numpy>=1.24.0
 python-dotenv>=1.0.0
 
 # TruLens for tracing and evaluation
-trulens>=1.0.0
-trulens-apps-langgraph>=1.0.0
-trulens-providers-cortex>=1.0.0
-trulens-connectors-snowflake>=1.0.0
+trulens-core>=2.6.0
+trulens-apps-langgraph>=2.6.0
+trulens-providers-cortex>=2.6.0
+trulens-connectors-snowflake>=2.6.0
