@@ -185,7 +185,11 @@ agent_schema = "AGENTS"                     # Your agent schema
 
 ## Running the Demo
 
-### Option 1: LangGraph Studio (Recommended)
+### Option 1: Run the notebook
+
+Choose `run all` to execute the entire notebook. View agent performance in Snowsight under AI > Evaluations.
+
+### Option 2: LangGraph Studio
 
 ```bash
 langgraph dev
@@ -193,7 +197,7 @@ langgraph dev
 
 This opens LangGraph Studio in your browser at `https://smith.langchain.com/studio/`
 
-### Option 2: Run Directly
+### Option 3: Run Directly
 
 ```bash
 python studio_app.py
@@ -215,6 +219,7 @@ Try these business scenarios:
 
 ```
 ├── studio_app.py              # Main LangGraph application
+├── build_and_evaluat....ipynb # Notebook with LangGraph application
 ├── langgraph.json             # LangGraph Studio configuration
 ├── requirements.txt           # Python dependencies
 ├── .env.template              # Environment template
@@ -233,24 +238,28 @@ Try these business scenarios:
 ## Troubleshooting
 
 ### Git Integration Issues
+
 - Ensure your role has `CREATE INTEGRATION` privileges
 - For private repos, create a secret with your GitHub token
 - Run `ALTER GIT REPOSITORY ... FETCH` to pull latest changes
 
 ### "401 Unauthorized" Error
+
 - Check your Snowflake credentials in `.env`
 - Verify your role has `USAGE` on the Cortex Agents
 - Ensure `agent_database` and `agent_schema` in `studio_app.py` are correct
 
 ### "No human message found"
+
 - Enter the query in the "Messages" field in LangGraph Studio
-- Leave the "Routing Decision" field empty (it's internal)
 
 ### Agent returns 0 customers
+
 - Verify Cortex Search service includes `customer_id` in ATTRIBUTES
 - Check that demo data was generated (`python data_generation.py`)
 
 ### Connection Issues
+
 - Verify `SNOWFLAKE_ACCOUNT` format (e.g., `org-account` or `account.region`)
 - Check warehouse is running and you have access
 
