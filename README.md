@@ -1,4 +1,4 @@
-# Multi-Agent Customer Intelligence Demo
+# Build and Evaluate Agents with Snowflake and LangGraph
 
 A sophisticated multi-agent AI system built with **LangGraph** and **Snowflake Cortex** for customer analytics, churn prediction, and business intelligence.
 
