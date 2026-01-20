@@ -2,8 +2,6 @@
 
 A sophisticated multi-agent AI system built with **LangGraph** and **Snowflake Cortex** for customer analytics, churn prediction, and business intelligence.
 
-> **Quick Start:** Clone this repo directly in Snowflake using Git Integration, then run LangGraph Studio locally to interact with the agents.
-
 ## Architecture
 
 ```
