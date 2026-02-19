@@ -18,7 +18,7 @@ numpy>=1.24.0
 python-dotenv>=1.0.0
 
 # TruLens for tracing and evaluation
-trulens-core>=2.5.3
-trulens-apps-langgraph>=2.5.3
-trulens-providers-cortex>=2.5.3
-trulens-connectors-snowflake>=2.5.3
+trulens-core>=2.7
+trulens-apps-langgraph>=2.7
+trulens-providers-cortex>=2.7
+trulens-connectors-snowflake>=2.7
